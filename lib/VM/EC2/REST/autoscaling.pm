@@ -426,6 +426,23 @@ sub put_scaling_policy {
     return $self->asg_call('PutScalingPolicy', @params);
 }
 
+=head2
+FIXME
+=cut
+
+sub put_life_cycle_hook {
+    my ($self, %args) = @_;
+    my $name = $args{-RoleARN} or croak "-RoleARN argument is required";
+    my $imageid = $args{-AutoScalingGroupName} or croak "-AutoScalingGroupName argument is required";
+    my $itype = $args{-instance_type} or croak "-instance_type argument is required";
+
+    my @params = map { $self->single_parm($_, \%args) }
+        qw( RoleARN AutoScalingGroupName LifecycleHookName
+            NotificationTargetARN LifecycleTransition );
+
+    return $self->asg_call('PutLifecycleHook', @params);
+}
+
 =head2 $success = $ec2->delete_policy(-policy_name => $name)
 
 Deletes a policy
