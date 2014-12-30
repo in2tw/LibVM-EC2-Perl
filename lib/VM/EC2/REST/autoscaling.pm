@@ -426,21 +426,38 @@ sub put_scaling_policy {
     return $self->asg_call('PutScalingPolicy', @params);
 }
 
-=head2
-FIXME
+=head2 $success = $ec2->put_life_cycle_hook(-RoleARN => $RoleARN,
+                                            -AutoScalingGroupName => AutoScalingGroupName,
+                                            -LifecycleHookName => LifecycleHookName,
+                                            -NotificationTargetARN => NotificationTargetARN,
+                                            -LifecycleTransition => LifecycleTransition);
+# FIXME: document here
 =cut
-
 sub put_life_cycle_hook {
     my ($self, %args) = @_;
     my $name = $args{-RoleARN} or croak "-RoleARN argument is required";
     my $imageid = $args{-AutoScalingGroupName} or croak "-AutoScalingGroupName argument is required";
-    my $itype = $args{-instance_type} or croak "-instance_type argument is required";
 
     my @params = map { $self->single_parm($_, \%args) }
         qw( RoleARN AutoScalingGroupName LifecycleHookName
             NotificationTargetARN LifecycleTransition );
 
     return $self->asg_call('PutLifecycleHook', @params);
+}
+
+=head2 $success = $ec2->detach_instances(-AutoScalingGroupName => AutoScalingGroupName,
+                                         -InstanceIds => [@ids], # max: 16 IDs
+                                         -ShouldDecrementDesiredCapacity => 1
+    );
+FIXME: document
+=cut
+sub detach_instances {
+    my ($self, %args) = @_;
+    $args{-ShouldDecrementDesiredCapacity} = $args{-ShouldDecrementDesiredCapacity} ? 'True' : 'False';
+    my @params = map { $self->single_parm($_, \%args) }
+        qw( AutoScalingGroupName ShouldDecrementDesiredCapacity );
+    push @params, $self->autoscaling_tags('InstanceIds', \%args);
+    return $self->asg_call('DetachInstances', @params);
 }
 
 =head2 $success = $ec2->delete_policy(-policy_name => $name)
